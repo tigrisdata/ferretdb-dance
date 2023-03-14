@@ -111,7 +111,7 @@ func mongorestore(t *testing.T, db, root, newDB string) {
 		"--numInsertionWorkersPerCollection=10",
 		"--stopOnError",
 		// "--preserveUUID", TODO https://github.com/FerretDB/FerretDB/issues/1682
-		"mongodb://host.docker.internal:27017/",
+		"mongodb://tigris_ferretdb:27017/",
 		root,
 	)
 }
@@ -127,6 +127,6 @@ func mongodump(t *testing.T, db, root string) {
 		"--db="+db,
 		"--out="+root,
 		"--numParallelCollections=10",
-		"mongodb://host.docker.internal:27017/",
+		"mongodb://tigris_ferretdb:27017/",
 	)
 }

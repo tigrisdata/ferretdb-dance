@@ -17,6 +17,27 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  tigris:
+    image: ${FERRETDB_IMAGE:-ferretdb-local}
+    container_name: tigris_ferretdb
+    depends_on: ["tigris_server"]
+    ports:
+      - 27017:27017
+    environment:
+      # Always UTC+05:45. Set to catch timezone problems.
+      - TZ=Asia/Kathmandu
+      #- FERRETDB_POSTGRESQL_URL=postgres://user@postgres:5432/dance
+      - FERRETDB_TIGRIS_URL=tigris_server:8081
+      - FERRETDB_HANDLER=tigris
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  tigris_server:
+    container_name: tigris_server
+    image: tigrisdata/tigris-local
+    ports:
+      - 8081:8081
+
   postgres:
     build:
       context: ./build/deps

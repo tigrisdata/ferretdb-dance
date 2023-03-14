@@ -24,3 +24,14 @@ results:
 
     fail:
       - not_regex: MongoDB$
+
+  tigris:
+    stats:
+      expected_fail: 71
+      expected_pass: 28
+
+    pass:
+      - regex: FerretDB$
+
+    fail:
+      - not_regex: FerretDB$

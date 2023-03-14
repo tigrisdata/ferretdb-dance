@@ -40,6 +40,7 @@ type Results struct {
 	Common   *TestsConfig
 	FerretDB *TestsConfig
 	MongoDB  *TestsConfig
+	Tigris   *TestsConfig
 }
 
 // LoadConfig loads and validates configuration from file.
@@ -71,9 +72,9 @@ func LoadConfig(path string) (*Config, error) {
 }
 
 // mergeTestConfigs merges common config into both databases test configs.
-func mergeTestConfigs(common, mongodb, ferretdb *TestsConfig) error {
+func mergeTestConfigs(common, mongodb, ferretdb, tigris *TestsConfig) error {
 	if common == nil {
-		if ferretdb == nil || mongodb == nil {
+		if ferretdb == nil || mongodb == nil || tigris == nil {
 			return fmt.Errorf("both FerretDB and MongoDB results must be set (if common results are not set)")
 		}
 		return nil
@@ -83,11 +84,12 @@ func mergeTestConfigs(common, mongodb, ferretdb *TestsConfig) error {
 		Common   *Tests
 		FerretDB *Tests
 		MongoDB  *Tests
+		Tigris   *Tests
 	}{
-		{&common.Skip, &ferretdb.Skip, &mongodb.Skip},
-		{&common.Fail, &ferretdb.Fail, &mongodb.Fail},
-		{&common.Pass, &ferretdb.Pass, &mongodb.Pass},
-		{&common.Ignore, &ferretdb.Ignore, &mongodb.Ignore},
+		{&common.Skip, &ferretdb.Skip, &mongodb.Skip, &tigris.Skip},
+		{&common.Fail, &ferretdb.Fail, &mongodb.Fail, &tigris.Fail},
+		{&common.Pass, &ferretdb.Pass, &mongodb.Pass, &tigris.Pass},
+		{&common.Ignore, &ferretdb.Ignore, &mongodb.Ignore, &tigris.Ignore},
 	} {
 		t.FerretDB.Names = append(t.FerretDB.Names, t.Common.Names...)
 		t.FerretDB.NameRegexPattern = append(t.FerretDB.NameRegexPattern, t.Common.NameRegexPattern...)
@@ -98,28 +100,35 @@ func mergeTestConfigs(common, mongodb, ferretdb *TestsConfig) error {
 		t.MongoDB.NameRegexPattern = append(t.MongoDB.NameRegexPattern, t.Common.NameRegexPattern...)
 		t.MongoDB.NameNotRegexPattern = append(t.MongoDB.NameNotRegexPattern, t.Common.NameNotRegexPattern...)
 		t.MongoDB.OutputRegexPattern = append(t.MongoDB.OutputRegexPattern, t.Common.OutputRegexPattern...)
+
+		t.Tigris.Names = append(t.Tigris.Names, t.Common.Names...)
+		t.Tigris.NameRegexPattern = append(t.Tigris.NameRegexPattern, t.Common.NameRegexPattern...)
+		t.Tigris.NameNotRegexPattern = append(t.Tigris.NameNotRegexPattern, t.Common.NameNotRegexPattern...)
+		t.Tigris.OutputRegexPattern = append(t.Tigris.OutputRegexPattern, t.Common.OutputRegexPattern...)
 	}
 
 	if common.Default != "" {
-		if ferretdb.Default != "" || mongodb.Default != "" {
+		if ferretdb.Default != "" || mongodb.Default != "" || tigris.Default != "" {
 			return errors.New("default value cannot be set in common, when it's set in database")
 		}
 		ferretdb.Default = common.Default
 		mongodb.Default = common.Default
+		tigris.Default = common.Default
 	}
 
 	if common.Stats != nil {
-		if ferretdb.Stats != nil || mongodb.Stats != nil {
+		if ferretdb.Stats != nil || mongodb.Stats != nil || tigris.Stats != nil {
 			return errors.New("stats value cannot be set in common, when it's set in database")
 		}
 		ferretdb.Stats = common.Stats
 		mongodb.Stats = common.Stats
+		tigris.Stats = common.Stats
 	}
 	return nil
 }
 
 func (c *Config) fillAndValidate() error {
-	if err := mergeTestConfigs(c.Results.Common, c.Results.FerretDB, c.Results.MongoDB); err != nil {
+	if err := mergeTestConfigs(c.Results.Common, c.Results.FerretDB, c.Results.MongoDB, c.Results.Tigris); err != nil {
 		return err
 	}
 
@@ -127,6 +136,7 @@ func (c *Config) fillAndValidate() error {
 		c.Results.Common,
 		c.Results.FerretDB,
 		c.Results.MongoDB,
+		c.Results.Tigris,
 	} {
 		if r == nil {
 			continue
@@ -158,6 +168,10 @@ func (r *Results) ForDB(db string) (*TestsConfig, error) {
 		}
 	case "mongodb":
 		if c := r.MongoDB; c != nil {
+			return c, nil
+		}
+	case "tigris":
+		if c := r.Tigris; c != nil {
 			return c, nil
 		}
 	default:

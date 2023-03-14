@@ -12,3 +12,6 @@ results:
 
   mongodb:
     stats:
+
+  tigris:
+    stats:

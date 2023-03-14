@@ -56,6 +56,7 @@ type ResultsYAML struct {
 	Common   *TestsConfigYAML `yaml:"common"`
 	FerretDB *TestsConfigYAML `yaml:"ferretdb"`
 	MongoDB  *TestsConfigYAML `yaml:"mongodb"`
+	Tigris   *TestsConfigYAML `yaml:"tigris"`
 }
 
 // TestsConfigYAML is a yaml representation of the TestsConfig struct.
@@ -87,11 +88,16 @@ func (cf *ConfigYAML) Convert() (*Config, error) {
 		return nil, err
 	}
 
+	tigris, err := cf.Results.Tigris.Convert()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
 		cf.Runner,
 		cf.Dir,
 		cf.Args,
-		Results{common, ferretDB, mongoDB},
+		Results{common, ferretDB, mongoDB, tigris},
 	}, nil
 }
 

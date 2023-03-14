@@ -88,7 +88,7 @@ func runCommand(dir, command string, args ...string) ([]byte, error) {
 		return nil, err
 	}
 
-	args = append([]string{"--verbose", "--norc", "mongodb://host.docker.internal:27017/"}, args...)
+	args = append([]string{"--verbose", "--norc", "mongodb://tigris_ferretdb:27017/"}, args...)
 	dockerArgs := append([]string{"compose", "run", "-T", "--rm", command}, args...)
 	cmd := exec.Command(bin, dockerArgs...)
 	cmd.Dir = dir
